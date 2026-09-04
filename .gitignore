@@ -3,6 +3,14 @@ Carthage
 
 ### macOS ###
 .DS_Store
+# AppleDouble sidecars: macOS creates these for every file on non-native
+# volumes (exFAT/NTFS/SMB). Left untracked they also break git itself, which
+# tries to read .git/objects/pack/._pack-*.idx as a real pack index.
+._*
 
 ### Xcode ###
 xcuserdata/
+build/
+
+### Project diagnostics ###
+phase1_diagnostic_log.txt
