@@ -130,9 +130,9 @@ class MenuHandler: NSMenu, NSMenuDelegate {
     self.refreshInputSourceCheckmarks()
   }
 
-  /// Ticks the menu item matching the input MonitorControl last commanded. (This monitor's 0x60 read
-  /// is unreliable — it reports DisplayPort regardless of the active input — so we track our own
-  /// commanded state instead of reading.)
+  /// Ticks the menu item matching the input MonitorControl last commanded. (The 0x60 value reads
+  /// DisplayPort whenever the Mac's input is live, so it can never name which other input is
+  /// showing — we track our own commanded state instead of reading it back.)
   func refreshInputSourceCheckmarks() {
     guard !self.inputSourceMenuItems.isEmpty else {
       return

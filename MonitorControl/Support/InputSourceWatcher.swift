@@ -86,13 +86,16 @@ final class InputSourceWatcher {
   /// taken rather than acting on stale counters. Call on the main thread whenever the display
   /// configuration or the setting changes.
   func refreshTargets() {
-    let target = InputSourceManager.shared.targetDisplay()
+    // The display we promote must be the very display we probe. Deriving the two separately —
+    // "first DDC-capable" for the probe, "first non-built-in" for the promotion — picks different
+    // monitors as soon as a third display is attached, so the watcher would probe one monitor's DDC
+    // and hand the menu bar to another.
+    let target = DisplayManager.shared.getDdcCapableDisplays().first { CGDisplayIsBuiltin($0.identifier) == 0 }
     let builtinID = DisplayManager.shared.getBuiltInDisplay()?.identifier
-    let externalID = DisplayManager.shared.displays.first(where: { CGDisplayIsBuiltin($0.identifier) == 0 })?.identifier
     self.queue.async {
       self.target = target
       self.builtinID = builtinID
-      self.externalID = externalID
+      self.externalID = target?.identifier
       self.state = .unknown
       self.silentProbes = 0
       self.answeredProbes = 0
