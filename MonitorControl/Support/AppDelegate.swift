@@ -16,6 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     item.behavior = .removalAllowed
     return item
   }()
+
   var mediaKeyTap = MediaKeyTapManager()
   var keyboardShortcuts = KeyboardShortcutsManager()
   let coreAudio = SimplyCoreAudio()
@@ -41,6 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   lazy var settingsWindowController: SettingsWindowController = .init(
     panes: [
       mainPrefsVc!,
+      schedulePrefsVc,
+      mainDisplayPrefsVc,
       menuslidersPrefsVc!,
       keyboardPrefsVc!,
       displaysPrefsVc!,
@@ -63,8 +66,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     self.setDefaultPrefs()
     self.setMenu()
     CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayReconfigured() }, nil)
+    if DEBUG_DIAG {
+      DiagnosticLogger.shared.start()
+    }
     self.configure(firstrun: true)
     DisplayManager.shared.createGammaActivityEnforcer()
+    BrightnessScheduler.shared.start()
+    KeepAwakeManager.shared.start()
     self.updaterController.startUpdater()
   }
 
@@ -79,6 +87,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @objc func prefsClicked(_: AnyObject) {
     os_log("Settings clicked", type: .info)
     self.settingsWindowController.show()
+  }
+
+  @objc func switchMainDisplayClicked(_: AnyObject?) {
+    os_log("Switch main display clicked", type: .info)
+    _ = DisplayLayoutManager.toggleMain()
+    // If the external display is now main, we're viewing the Mac on it → it's on the Mac input.
+    if let external = DisplayManager.shared.displays.first(where: { CGDisplayIsBuiltin($0.identifier) == 0 }), DisplayLayoutManager.isMain(external.identifier) {
+      InputSourceManager.shared.markActiveAsHost()
+    }
+  }
+
+  @objc func monitorInputSelected(_ sender: NSMenuItem) {
+    guard sender.state != .on else {
+      return // already the active input
+    }
+    InputSourceManager.shared.switchTo(code: UInt16(sender.tag))
+  }
+
+  @objc func toggleKeepDisplayAwake(_: NSMenuItem) {
+    KeepAwakeManager.shared.setDisplayAwake(!KeepAwakeManager.shared.isDisplayAwakeEnabled)
+    menu.updateMenus()
+  }
+
+  @objc func toggleKeepSystemAwake(_: NSMenuItem) {
+    KeepAwakeManager.shared.setSystemAwake(!KeepAwakeManager.shared.isSystemAwakeEnabled)
+    menu.updateMenus()
   }
 
   func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
@@ -116,6 +150,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @objc func displayReconfigured() {
+    if DEBUG_DIAG {
+      DiagnosticLogger.shared.logReconfigure(reconfigureID: self.reconfigureID + 1, sleepID: self.sleepID)
+    }
     DisplayManager.shared.resetSwBrightnessForAllDisplays(noPrefSave: true)
     CGDisplayRestoreColorSyncSettings()
     self.reconfigureID += 1
@@ -176,16 +213,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(self.sleepNotification), name: NSWorkspace.willSleepNotification, object: nil)
     NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(self.wakeNotification), name: NSWorkspace.didWakeNotification, object: nil)
     _ = DistributedNotificationCenter.default().addObserver(forName: NSNotification.Name(rawValue: NSNotification.Name.accessibilityApi.rawValue), object: nil, queue: nil) { _ in DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.updateMediaKeyTap() } } // listen for accessibility status changes
-    self.statusItemObserver = statusItem.observe(\.isVisible, options: [.old, .new]) { _, _ in self.statusItemVisibilityChanged() }
+    self.statusItemObserver = self.statusItem.observe(\.isVisible, options: [.old, .new]) { _, _ in self.statusItemVisibilityChanged() }
   }
 
   @objc private func sleepNotification() {
     self.sleepID += 1
     os_log("Sleeping with sleep %{public}@", type: .info, String(self.sleepID))
+    if DEBUG_DIAG {
+      DiagnosticLogger.shared.logSleep(sleepID: self.sleepID, source: "NSWorkspace sleep notification")
+    }
     self.updateMediaKeyTap()
   }
 
   @objc private func wakeNotification() {
+    if DEBUG_DIAG {
+      DiagnosticLogger.shared.logWake(sleepID: self.sleepID, source: "NSWorkspace wake notification")
+    }
     if self.sleepID != 0 {
       os_log("Waking up from sleep %{public}@", type: .info, String(self.sleepID))
       let dispatchedSleepID = self.sleepID
@@ -360,16 +403,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     onboardingVc?.window?.center()
     NSApp.activate(ignoringOtherApps: true)
   }
-  
+
   private func statusItemVisibilityChanged() {
     if !self.statusItem.isVisible, self.statusItemVisibilityChangedByUser {
       prefs.set(MenuIcon.hide.rawValue, forKey: PrefKey.menuIcon.rawValue)
     }
   }
-  
+
   func updateStatusItemVisibility(_ visible: Bool) {
-    statusItemVisibilityChangedByUser = false
-    statusItem.isVisible = visible
-    statusItemVisibilityChangedByUser = true
+    self.statusItemVisibilityChangedByUser = false
+    self.statusItem.isVisible = visible
+    self.statusItemVisibilityChangedByUser = true
   }
 }

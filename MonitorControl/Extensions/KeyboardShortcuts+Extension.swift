@@ -11,5 +11,9 @@ extension KeyboardShortcuts.Name {
   static let volumeDown = Self("volumeDown")
   static let mute = Self("mute")
 
+  // Feature B
+  static let toggleMainDisplay = Self("toggleMainDisplay")
+  static let switchMonitorInput = Self("switchMonitorInput")
+
   static let none = Self("none")
 }

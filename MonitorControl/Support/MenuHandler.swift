@@ -8,6 +8,9 @@ class MenuHandler: NSMenu, NSMenuDelegate {
 
   var lastMenuRelevantDisplayId: CGDirectDisplayID = 0
 
+  /// Feature B: input-source menu items, kept so their active-port checkmark can be refreshed on open.
+  var inputSourceMenuItems: [NSMenuItem] = []
+
   func clearMenu() {
     var items: [NSMenuItem] = []
     for i in 0 ..< self.items.count {
@@ -17,10 +20,12 @@ class MenuHandler: NSMenu, NSMenuDelegate {
       self.removeItem(item)
     }
     self.combinedSliderHandler.removeAll()
+    self.inputSourceMenuItems.removeAll()
   }
 
   func menuWillOpen(_: NSMenu) {
     self.updateMenuRelevantDisplay()
+    self.refreshInputSourceCheckmarks()
     app.keyboardShortcuts.disengage()
   }
 
@@ -71,7 +76,71 @@ class MenuHandler: NSMenu, NSMenuDelegate {
         self.addCombinedDisplayMenuBlock()
       }
     }
+    self.addMainDisplaySwitchItem()
+    self.addInputSourceMenu()
+    self.addKeepAwakeMenu()
     self.addDefaultMenuOptions()
+  }
+
+  /// Keep Awake (caffeine) toggles with checkmarks.
+  func addKeepAwakeMenu() {
+    self.insertItem(NSMenuItem.separator(), at: self.items.count)
+    let displayItem = NSMenuItem(title: NSLocalizedString("Keep display awake", comment: "Shown in menu"), action: #selector(app.toggleKeepDisplayAwake(_:)), keyEquivalent: "")
+    displayItem.target = app
+    displayItem.state = KeepAwakeManager.shared.isDisplayAwakeEnabled ? .on : .off
+    self.insertItem(displayItem, at: self.items.count)
+    let systemItem = NSMenuItem(title: NSLocalizedString("Keep system awake", comment: "Shown in menu"), action: #selector(app.toggleKeepSystemAwake(_:)), keyEquivalent: "")
+    systemItem.target = app
+    systemItem.state = KeepAwakeManager.shared.isSystemAwakeEnabled ? .on : .off
+    self.insertItem(systemItem, at: self.items.count)
+  }
+
+  /// Feature B: manual "Switch main display" button. Shown only when both a built-in and an
+  /// external display are connected (otherwise toggling main is meaningless).
+  func addMainDisplaySwitchItem() {
+    guard DisplayLayoutManager.canSwitch() else {
+      return
+    }
+    self.insertItem(NSMenuItem.separator(), at: self.items.count)
+    let item = NSMenuItem(title: NSLocalizedString("Switch main display", comment: "Shown in menu"), action: #selector(app.switchMainDisplayClicked(_:)), keyEquivalent: "")
+    item.target = app
+    self.insertItem(item, at: self.items.count)
+  }
+
+  /// Feature B: "Monitor input" submenu listing the monitor's inputs with a checkmark on the active
+  /// one. Selecting an input writes VCP 0x60 (and moves the built-in display to main). Shown only
+  /// when a DDC-capable external display is present.
+  func addInputSourceMenu() {
+    self.inputSourceMenuItems.removeAll()
+    guard InputSourceManager.shared.targetDisplay() != nil else {
+      return
+    }
+    let submenu = NSMenu()
+    for input in InputSourceManager.shared.inputs {
+      let code = InputSourceManager.shared.code(for: input)
+      let item = NSMenuItem(title: input.name, action: #selector(app.monitorInputSelected(_:)), keyEquivalent: "")
+      item.target = app
+      item.tag = Int(code)
+      submenu.addItem(item)
+      self.inputSourceMenuItems.append(item)
+    }
+    let parent = NSMenuItem(title: NSLocalizedString("Monitor input", comment: "Shown in menu"), action: nil, keyEquivalent: "")
+    parent.submenu = submenu
+    self.insertItem(parent, at: self.items.count)
+    self.refreshInputSourceCheckmarks()
+  }
+
+  /// Ticks the menu item matching the input MonitorControl last commanded. (This monitor's 0x60 read
+  /// is unreliable — it reports DisplayPort regardless of the active input — so we track our own
+  /// commanded state instead of reading.)
+  func refreshInputSourceCheckmarks() {
+    guard !self.inputSourceMenuItems.isEmpty else {
+      return
+    }
+    let active = Int(InputSourceManager.shared.activeInputCode)
+    for item in self.inputSourceMenuItems {
+      item.state = (item.tag == active) ? .on : .off
+    }
   }
 
   func addSliderItem(monitorSubMenu: NSMenu, sliderHandler: SliderHandler) {

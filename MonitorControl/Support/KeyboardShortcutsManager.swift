@@ -57,6 +57,20 @@ class KeyboardShortcutsManager {
     KeyboardShortcuts.onKeyUp(for: .volumeDown) { [self] in
       self.disengage()
     }
+
+    // Feature B — single-shot actions (no key-repeat). Deliberately outside the brightness/volume
+    // sets below: they are independent of the keyboardBrightness/keyboardVolume prefs, so
+    // updateRegistrations() must not enable or disable them.
+    KeyboardShortcuts.onKeyDown(for: .toggleMainDisplay) {
+      DispatchQueue.main.async {
+        _ = DisplayLayoutManager.toggleMain()
+      }
+    }
+    KeyboardShortcuts.onKeyDown(for: .switchMonitorInput) {
+      DispatchQueue.main.async {
+        InputSourceManager.shared.cycleToNextInput()
+      }
+    }
     self.updateRegistrations()
   }
 
