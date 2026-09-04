@@ -104,6 +104,9 @@ enum PrefKey: String {
   /// Evening target brightness (Float 0...1)
   case scheduleEveningBrightness
 
+  /// prefsId of the display the schedule drives. Empty/absent → every DDC-capable display.
+  case scheduleTargetDisplay
+
   /* -- Monitor input switching (Feature B) -- */
 
   /// Use LG alternate VCP 0x60 addressing for input switching (fallback)

@@ -190,6 +190,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     displaysPrefsVc?.loadDisplayList()
     self.job(start: true)
+    // A reconfiguration (reconnect, resolution change, monitor returning from another input) leaves
+    // the display on its own remembered brightness — put the scheduled value back.
+    BrightnessScheduler.shared.reassert(reason: "display reconfiguration")
   }
 
   func updateMenusAndKeys() {
@@ -253,6 +256,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       }
       self.startupActionWriteRepeatAfterSober()
       self.updateMediaKeyTap()
+      // Covers waking without a reconfiguration event, where `configure` is never reached.
+      // Debounced in the scheduler, so the two paths collapse into one write.
+      BrightnessScheduler.shared.reassert(reason: "wake from sleep")
     }
   }
 

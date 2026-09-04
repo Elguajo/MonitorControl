@@ -34,6 +34,10 @@ class SchedulePrefsViewController: NSViewController, SettingsPane {
   private let eveningSlider = NSSlider(value: 0.65, minValue: 0, maxValue: 1, target: nil, action: nil)
   private let eveningValueLabel = NSTextField(labelWithString: "65%")
 
+  private let displayPopUp = NSPopUpButton(frame: .zero, pullsDown: false)
+  /// prefsId per `displayPopUp` item index; "" is the "All displays" item.
+  private var displayPopUpIds: [String] = []
+
   private var rowControls: [NSControl] = []
 
   // MARK: - View construction (programmatic)
@@ -50,6 +54,15 @@ class SchedulePrefsViewController: NSViewController, SettingsPane {
     self.enabledCheckbox.action = #selector(self.enabledChanged(_:))
     let enableRow = grid.addRow(with: [self.enabledCheckbox])
     enableRow.mergeCells(in: NSRange(location: 0, length: 3))
+
+    // Target display row.
+    self.displayPopUp.target = self
+    self.displayPopUp.action = #selector(self.displayChanged(_:))
+    grid.addRow(with: [
+      NSTextField(labelWithString: NSLocalizedString("Display", comment: "Schedule prefs")),
+      self.displayPopUp,
+      NSGridCell.emptyContentView,
+    ])
 
     // Header row.
     grid.addRow(with: [
@@ -105,6 +118,7 @@ class SchedulePrefsViewController: NSViewController, SettingsPane {
   // MARK: - Populate from prefs
 
   func populateSettings() {
+    self.populateDisplays()
     self.enabledCheckbox.state = self.scheduler.isEnabled ? .on : .off
     self.morningTimePicker.dateValue = Self.dateFromMinutes(self.scheduler.morningTime)
     self.morningSlider.floatValue = self.scheduler.morningBrightness
@@ -114,6 +128,27 @@ class SchedulePrefsViewController: NSViewController, SettingsPane {
     self.updateEnabledState()
   }
 
+  /// Rebuilds the display picker: "All displays" plus every connected DDC-capable display. A saved
+  /// display that isn't connected right now is still listed (marked unavailable) so opening this
+  /// pane with the monitor off can't silently reset the choice to "All displays".
+  private func populateDisplays() {
+    self.displayPopUp.removeAllItems()
+    self.displayPopUpIds = [""]
+    self.displayPopUp.addItem(withTitle: NSLocalizedString("All displays", comment: "Schedule prefs"))
+
+    let saved = self.scheduler.targetDisplayPrefsId
+    for display in DisplayManager.shared.getDdcCapableDisplays() {
+      let friendly = display.readPrefAsString(key: .friendlyName)
+      self.displayPopUp.addItem(withTitle: friendly.isEmpty ? display.name : friendly)
+      self.displayPopUpIds.append(display.prefsId)
+    }
+    if !saved.isEmpty, !self.displayPopUpIds.contains(saved) {
+      self.displayPopUp.addItem(withTitle: NSLocalizedString("Saved display (not connected)", comment: "Schedule prefs"))
+      self.displayPopUpIds.append(saved)
+    }
+    self.displayPopUp.selectItem(at: self.displayPopUpIds.firstIndex(of: saved) ?? 0)
+  }
+
   private func updateValueLabels() {
     self.morningValueLabel.stringValue = "\(Int(round(self.morningSlider.floatValue * 100)))%"
     self.eveningValueLabel.stringValue = "\(Int(round(self.eveningSlider.floatValue * 100)))%"
@@ -121,7 +156,7 @@ class SchedulePrefsViewController: NSViewController, SettingsPane {
 
   private func updateEnabledState() {
     let on = self.enabledCheckbox.state == .on
-    for control in [self.morningTimePicker, self.morningSlider, self.eveningTimePicker, self.eveningSlider] as [NSControl] {
+    for control in [self.displayPopUp, self.morningTimePicker, self.morningSlider, self.eveningTimePicker, self.eveningSlider] as [NSControl] {
       control.isEnabled = on
     }
   }
@@ -131,6 +166,15 @@ class SchedulePrefsViewController: NSViewController, SettingsPane {
   @objc private func enabledChanged(_ sender: NSButton) {
     prefs.set(sender.state == .on, forKey: PrefKey.scheduleEnabled.rawValue)
     self.updateEnabledState()
+    self.scheduler.settingsChanged()
+  }
+
+  @objc private func displayChanged(_ sender: NSPopUpButton) {
+    let index = sender.indexOfSelectedItem
+    guard index >= 0, index < self.displayPopUpIds.count else {
+      return
+    }
+    prefs.set(self.displayPopUpIds[index], forKey: PrefKey.scheduleTargetDisplay.rawValue)
     self.scheduler.settingsChanged()
   }
 
