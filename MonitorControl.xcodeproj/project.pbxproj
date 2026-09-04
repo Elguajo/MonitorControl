@@ -18,6 +18,7 @@
 		6CDDA60000000000000000E6 /* DisplayLayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDDA60000000000000000E5 /* DisplayLayoutManager.swift */; };
 		6CDDA60000000000000000EC /* InputSourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDDA60000000000000000EB /* InputSourceManager.swift */; };
 		6CDDA60000000000000000EE /* KeepAwakeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDDA60000000000000000ED /* KeepAwakeManager.swift */; };
+		6CDDA60000000000000000F0 /* InputSourceWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDDA60000000000000000EF /* InputSourceWatcher.swift */; };
 		6CDDA60000000000000000EA /* MainDisplayPrefsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDDA60000000000000000E9 /* MainDisplayPrefsViewController.swift */; };
 		6CBFE27A23DB266000D1BC41 /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CBFE27923DB266000D1BC41 /* Display.swift */; };
 		6CBFE27C23DB27A200D1BC41 /* AppleDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CBFE27B23DB27A200D1BC41 /* AppleDisplay.swift */; };
@@ -102,6 +103,7 @@
 		6CDDA60000000000000000E5 /* DisplayLayoutManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayLayoutManager.swift; sourceTree = "<group>"; };
 		6CDDA60000000000000000EB /* InputSourceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSourceManager.swift; sourceTree = "<group>"; };
 		6CDDA60000000000000000ED /* KeepAwakeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeepAwakeManager.swift; sourceTree = "<group>"; };
+		6CDDA60000000000000000EF /* InputSourceWatcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputSourceWatcher.swift; sourceTree = "<group>"; };
 		6CDDA60000000000000000E9 /* MainDisplayPrefsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainDisplayPrefsViewController.swift; sourceTree = "<group>"; };
 		6CBFE27923DB266000D1BC41 /* Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Display.swift; sourceTree = "<group>"; };
 		6CBFE27B23DB27A200D1BC41 /* AppleDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleDisplay.swift; sourceTree = "<group>"; };
@@ -330,6 +332,7 @@
 				6CDDA60000000000000000E1 /* BrightnessScheduler.swift */,
 				6CDDA60000000000000000E5 /* DisplayLayoutManager.swift */,
 				6CDDA60000000000000000EB /* InputSourceManager.swift */,
+				6CDDA60000000000000000EF /* InputSourceWatcher.swift */,
 				6CDDA60000000000000000ED /* KeepAwakeManager.swift */,
 				AA25F6D626E68C160087F3A2 /* MediaKeyTapManager.swift */,
 				AA44E70627038F7F00E06865 /* KeyboardShortcutsManager.swift */,
@@ -672,6 +675,7 @@
 				6CDDA60000000000000000E6 /* DisplayLayoutManager.swift in Sources */,
 				6CDDA60000000000000000EC /* InputSourceManager.swift in Sources */,
 				6CDDA60000000000000000EE /* KeepAwakeManager.swift in Sources */,
+				6CDDA60000000000000000F0 /* InputSourceWatcher.swift in Sources */,
 				6CDDA60000000000000000EA /* MainDisplayPrefsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

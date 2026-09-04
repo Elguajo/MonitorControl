@@ -2,10 +2,10 @@
 //
 //  Feature B — main display switching settings pane (programmatic, no Main.storyboard editing).
 //
-//  Manual approach (chosen to avoid continuous DDC polling / battery drain): a button switches the
-//  main display between the external monitor and the built-in screen. The user changes the monitor's
-//  physical input themselves. Monitor sleep is handled by macOS' own reconfiguration events, so the
-//  app never reshuffles windows on sleep. The same action is also available in the menu-bar menu.
+//  A button switches the main display between the external monitor and the built-in screen; the same
+//  action is in the menu-bar menu and on a global shortcut. Optionally InputSourceWatcher does it
+//  automatically by watching DDC responsiveness — off by default, since it costs a periodic DDC
+//  query. Monitor sleep is never mistaken for an input change, so windows are not reshuffled on sleep.
 
 import Cocoa
 import KeyboardShortcuts
@@ -27,6 +27,7 @@ class MainDisplayPrefsViewController: NSViewController, SettingsPane {
   private let switchButton = NSButton(title: NSLocalizedString("Switch main display (external ↔ built-in)", comment: "Main display prefs"), target: nil, action: nil)
   private let statusLabel = NSTextField(labelWithString: "")
   private let altAddressingCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Use LG alternate input addressing (try this if switching the monitor input does nothing)", comment: "Main display prefs"), target: nil, action: nil)
+  private let autoSwitchCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Move the main display automatically when the monitor changes input", comment: "Main display prefs"), target: nil, action: nil)
   private let keepDisplayAwakeCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Keep display awake (prevent the screen from sleeping)", comment: "Main display prefs"), target: nil, action: nil)
   private let keepSystemAwakeCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Keep system awake (prevent the Mac from sleeping)", comment: "Main display prefs"), target: nil, action: nil)
 
@@ -46,9 +47,16 @@ class MainDisplayPrefsViewController: NSViewController, SettingsPane {
     self.altAddressingCheckbox.target = self
     self.altAddressingCheckbox.action = #selector(self.altAddressingChanged(_:))
 
-    let inputNote = NSTextField(wrappingLabelWithString: NSLocalizedString("To switch which input the monitor shows (DisplayPort / HDMI 1 / HDMI 2), use the “Monitor input” submenu in the menu bar. Selecting a non-Mac input also moves windows to the built-in screen. Returning to the Mac input is done from the other computer or the monitor's own button.", comment: "Main display prefs"))
+    let inputNote = NSTextField(wrappingLabelWithString: NSLocalizedString("To switch which input the monitor shows (DisplayPort / HDMI 1 / HDMI 2), use the “Monitor input” submenu in the menu bar. Selecting a non-Mac input also moves windows to the built-in screen. Returning to the Mac input is done from the other computer or the monitor's own button — turn on automatic switching above to have windows move back by themselves.", comment: "Main display prefs"))
     inputNote.textColor = .secondaryLabelColor
     inputNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+
+    self.autoSwitchCheckbox.target = self
+    self.autoSwitchCheckbox.action = #selector(self.autoSwitchChanged(_:))
+
+    let autoNote = NSTextField(wrappingLabelWithString: NSLocalizedString("The monitor stops answering DDC while it shows another computer, so the app can tell that apart from the monitor going to sleep (which never moves your windows). When it stops answering, the built-in screen becomes main; when it answers again, the monitor does. Costs a small DDC query every two seconds.", comment: "Main display prefs"))
+    autoNote.textColor = .secondaryLabelColor
+    autoNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
 
     let shortcutsHeader = NSTextField(labelWithString: NSLocalizedString("Global keyboard shortcuts", comment: "Main display prefs"))
     shortcutsHeader.font = .boldSystemFont(ofSize: NSFont.systemFontSize)
@@ -62,7 +70,7 @@ class MainDisplayPrefsViewController: NSViewController, SettingsPane {
     self.keepSystemAwakeCheckbox.target = self
     self.keepSystemAwakeCheckbox.action = #selector(self.keepSystemAwakeChanged(_:))
 
-    let stack = NSStackView(views: [self.switchButton, self.statusLabel, explanation, self.separator(), self.altAddressingCheckbox, inputNote, self.separator(), shortcutsHeader, toggleRow, inputRow, self.separator(), keepAwakeHeader, self.keepDisplayAwakeCheckbox, self.keepSystemAwakeCheckbox])
+    let stack = NSStackView(views: [self.switchButton, self.statusLabel, explanation, self.separator(), self.autoSwitchCheckbox, autoNote, self.separator(), self.altAddressingCheckbox, inputNote, self.separator(), shortcutsHeader, toggleRow, inputRow, self.separator(), keepAwakeHeader, self.keepDisplayAwakeCheckbox, self.keepSystemAwakeCheckbox])
     stack.orientation = .vertical
     stack.alignment = .leading
     stack.spacing = 12
@@ -88,6 +96,7 @@ class MainDisplayPrefsViewController: NSViewController, SettingsPane {
   func populateSettings() {
     self.switchButton.isEnabled = DisplayLayoutManager.canSwitch()
     self.altAddressingCheckbox.state = prefs.bool(forKey: PrefKey.useAlternateInputAddressing.rawValue) ? .on : .off
+    self.autoSwitchCheckbox.state = InputSourceWatcher.shared.isEnabled ? .on : .off
     self.keepDisplayAwakeCheckbox.state = KeepAwakeManager.shared.isDisplayAwakeEnabled ? .on : .off
     self.keepSystemAwakeCheckbox.state = KeepAwakeManager.shared.isSystemAwakeEnabled ? .on : .off
     self.updateStatus()
@@ -128,6 +137,12 @@ class MainDisplayPrefsViewController: NSViewController, SettingsPane {
 
   @objc private func altAddressingChanged(_ sender: NSButton) {
     prefs.set(sender.state == .on, forKey: PrefKey.useAlternateInputAddressing.rawValue)
+  }
+
+  @objc private func autoSwitchChanged(_ sender: NSButton) {
+    prefs.set(sender.state == .on, forKey: PrefKey.autoSwitchMainDisplay.rawValue)
+    // Start from a clean baseline: whatever the monitor is doing right now is recorded, not acted on.
+    InputSourceWatcher.shared.refreshTargets()
   }
 
   @objc private func keepDisplayAwakeChanged(_ sender: NSButton) {

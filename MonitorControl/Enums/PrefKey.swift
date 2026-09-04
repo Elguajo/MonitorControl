@@ -115,6 +115,9 @@ enum PrefKey: String {
   /// Learned VCP 0x60 value of the input the Mac is connected to (host input)
   case hostInputCode
 
+  /// Watch DDC responsiveness and move the main display when the monitor changes input
+  case autoSwitchMainDisplay
+
   /* -- Keep awake (caffeine) -- */
 
   /// Prevent the display from sleeping

@@ -72,6 +72,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     self.configure(firstrun: true)
     DisplayManager.shared.createGammaActivityEnforcer()
     BrightnessScheduler.shared.start()
+    InputSourceWatcher.shared.start()
     KeepAwakeManager.shared.start()
     self.updaterController.startUpdater()
   }
@@ -193,6 +194,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // A reconfiguration (reconnect, resolution change, monitor returning from another input) leaves
     // the display on its own remembered brightness — put the scheduled value back.
     BrightnessScheduler.shared.reassert(reason: "display reconfiguration")
+    // The display set changed, so any belief about which input the monitor shows is stale.
+    InputSourceWatcher.shared.refreshTargets()
   }
 
   func updateMenusAndKeys() {

@@ -10,13 +10,17 @@
 //   • Switching AWAY from the Mac (DP → HDMI) via a DDC write WORKS.
 //   • Switching BACK to the Mac from the Mac does NOT work: the monitor ignores an input-select write
 //     received on its inactive (DisplayPort) input while it is displaying another input.
-//   • Reading 0x60 over DisplayPort is UNRELIABLE: it returns 15 (DisplayPort) regardless of the
-//     actually-active input. So we cannot use DDC reads to know/verify the active input.
+//   • The 0x60 VALUE is uninformative: it reads 15 (DisplayPort) whenever the Mac's input is live,
+//     so it can never name which other input is showing. We therefore track the active input by
+//     what WE last commanded rather than by reading it back.
+//   • The 0x60 REPLY, however, is informative: while another input is shown the monitor does not
+//     answer DDC at all. InputSourceWatcher uses that presence/absence signal to detect the
+//     monitor leaving for, and returning from, the other computer.
 //
-//  Consequently we track the active input by what WE last commanded (not by reading), use that for
-//  the menu checkmark, and on a "return to Mac" we only best-effort write (no auto main-display move,
-//  so we can never strand the menu bar on a monitor that's showing the other computer). Returning the
-//  monitor to the Mac must be done from the other computer or the monitor's own button.
+//  Consequently the menu checkmark follows the commanded input, and on a "return to Mac" we only
+//  best-effort write (never a blind main-display move, so we can't strand the menu bar on a monitor
+//  showing the other computer). Returning the monitor to the Mac is done from the other computer or
+//  the monitor's own button; InputSourceWatcher then notices and restores the layout.
 
 import Cocoa
 import os.log
