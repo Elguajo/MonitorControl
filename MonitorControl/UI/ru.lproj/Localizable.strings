@@ -1,6 +1,9 @@
 /* Shown in the main prefs window */
 "About" = "О программе";
 
+/* Schedule prefs */
+"All displays" = "Все дисплеи";
+
 /* Shown in the alert dialog */
 "An other app seems to change the brightness or colors which causes issues.\n\nTo solve this, you need to quit the other app or disable gamma control for your displays in MonitorControl!" = "Похоже другое приложение изменяет яркость или цвета, что вызывает проблемы.\n\nДля решения этой проблемы вам нужно закрыть другое приложение или отключить управление гаммой для ваших дисплеев в MonitorControl!";
 
@@ -16,6 +19,9 @@
 /* Shown in menu */
 "Brightness" = "Яркость";
 
+/* Schedule prefs */
+"Brightness is changed over DDC (hardware) and transitions smoothly. Values and times are saved and restored on restart." = "Яркость меняется по DDC (аппаратно) и переходит плавно. Значения и время сохраняются и восстанавливаются при перезапуске.";
+
 /* Build */
 "Build" = "Релиз";
 
@@ -25,11 +31,20 @@
 /* Shown in menu */
 "Check for updates…" = "Проверить наличие обновлений…";
 
+/* Main display prefs */
+"Connect both the built-in screen and an external monitor to switch." = "Для переключения подключите одновременно встроенный экран и внешний монитор.";
+
 /* Shown in menu */
 "Contrast" = "Контраст";
 
 /* Version */
 "Copyright Ⓒ MonitorControl, " = "Copyright Ⓒ MonitorControl, ";
+
+/* Main display prefs */
+"Current main display: %@" = "Текущий главный дисплей: %@";
+
+/* Main display prefs */
+"Cycle monitor input:" = "Переключить вход монитора:";
 
 /* Shown in record shortcut box */
 "Decrease" = "Уменьшить";
@@ -37,11 +52,23 @@
 /* Shown in the alert dialog */
 "Disable gamma control for my displays" = "Отключить управление гаммой для моих дисплеев";
 
+/* Schedule prefs */
+"Display" = "Дисплей";
+
+/* Monitor input */
+"DisplayPort" = "DisplayPort";
+
 /* Shown in the main prefs window */
 "Displays" = "Дисплеи";
 
+/* Schedule prefs */
+"Enable brightness schedule" = "Включить расписание яркости";
+
 /* Shown in the alert dialog */
 "Enable Longer Delay?" = "Включить более длительную задержку?";
+
+/* Schedule prefs */
+"Evening" = "Вечер";
 
 /* Shown in the Display Settings */
 "External Display" = "Внешний дисплей";
@@ -49,11 +76,20 @@
 /* Shown in the main prefs window */
 "General" = "Основные";
 
+/* Main display prefs */
+"Global keyboard shortcuts" = "Глобальные сочетания клавиш";
+
 /* Shown in the Display Settings */
 "Hardware (Apple)" = "Аппаратный (Apple)";
 
 /* Shown in the Display Settings */
 "Hardware (DDC)" = "Аппаратный (DDC)";
+
+/* Monitor input */
+"HDMI 1" = "HDMI 1";
+
+/* Monitor input */
+"HDMI 2" = "HDMI 2";
 
 /* Shown in the alert dialog */
 "I'll quit the other app" = "Я выйду из другого приложения";
@@ -67,8 +103,35 @@
 /* Shown in the alert dialog */
 "Is f.lux or similar running?" = "Запущен f.lux или что-то похожее?";
 
+/* Main display prefs */
+"Keep awake" = "Не давать засыпать";
+
+/* Shown in menu */
+"Keep display awake" = "Не давать экрану засыпать";
+
+/* Main display prefs */
+"Keep display awake (prevent the screen from sleeping)" = "Не давать экрану засыпать (предотвращать сон экрана)";
+
+/* Shown in menu */
+"Keep system awake" = "Не давать Mac засыпать";
+
+/* Main display prefs */
+"Keep system awake (prevent the Mac from sleeping)" = "Не давать Mac засыпать (предотвращать сон системы)";
+
 /* Shown in the main prefs window */
 "Keyboard" = "Клавиатура";
+
+/* Shown in the main display prefs window */
+"Main Display" = "Главный дисплей";
+
+/* Shown in menu */
+"Monitor input" = "Вход монитора";
+
+/* Schedule prefs */
+"Morning" = "Утро";
+
+/* Main display prefs */
+"Move the main display automatically when the monitor changes input" = "Автоматически переносить главный дисплей при смене входа монитора";
 
 /* Shown in record shortcut box */
 "Mute" = "Откл. звук";
@@ -82,12 +145,6 @@
 /* Shown in the Display Settings */
 "Other Display" = "Другой дисплей";
 
-/* Shown in the alert dialog */
-"Settings for an incompatible previous app version detected. Default settings are reloaded." = "Обнаружены настройки от несовместимой предыдущей версии приложения. Будут загружены настройки по умолчанию.";
-
-/* Shown in menu */
-"Settings…" = "Настройки…";
-
 /* Shown in menu */
 "Quit" = "Выйти";
 
@@ -96,6 +153,18 @@
 
 /* Shown in the alert dialog */
 "Safe Mode Activated" = "Активирован безопасный режим";
+
+/* Schedule prefs */
+"Saved display (not connected)" = "Сохранённый дисплей (не подключён)";
+
+/* Shown in the schedule prefs window */
+"Schedule" = "Расписание";
+
+/* Shown in the alert dialog */
+"Settings for an incompatible previous app version detected. Default settings are reloaded." = "Обнаружены настройки от несовместимой предыдущей версии приложения. Будут загружены настройки по умолчанию.";
+
+/* Shown in menu */
+"Settings…" = "Настройки…";
 
 /* Shown in the alert dialog */
 "Shift was pressed during launch. MonitorControl started in safe mode. Default settings are reloaded, DDC read is blocked." = "Shift был нажат во время запуска. MonitorControl запущен в безопасном режиме. Загружены настройки по умолчанию, чтение DDC заблокировано.";
@@ -115,6 +184,18 @@
 /* Shown in the Display Settings */
 "Software (shade, forced)" = "Программное (затенение, принудительно)";
 
+/* Shown in menu */
+"Switch main display" = "Переключить главный дисплей";
+
+/* Main display prefs */
+"Switch main display (external ↔ built-in)" = "Переключить главный дисплей (внешний ↔ встроенный)";
+
+/* Main display prefs */
+"Switch main display:" = "Переключить главный дисплей:";
+
+/* Main display prefs */
+"The monitor stops answering DDC while it shows another computer, so the app can tell that apart from the monitor going to sleep (which never moves your windows). When it stops answering, the built-in screen becomes main; when it answers again, the monitor does. Costs a small DDC query every two seconds." = "Пока монитор показывает другой компьютер, он перестаёт отвечать по DDC — по этому признаку приложение отличает смену входа от засыпания монитора (при засыпании окна не переносятся). Перестал отвечать — главным становится встроенный экран, ответил снова — монитор. Стоит одного небольшого DDC-запроса раз в две секунды.";
+
 /* Shown in the Display Settings */
 "This display allows for software brightness control via gamma table manipulation or shade as it does not support hardware control. Reasons for this might be using the HDMI port of a Mac mini (which blocks hardware DDC control) or having a blacklisted display." = "Этот дисплей позволяет программно регулировать яркость с помощью манипуляций с таблицей гаммы или оттенков, поскольку он не поддерживает аппаратное управление. Причинами этого может быть использование HDMI порта на Mac mini (который блокирует аппаратное управление DDC) или наличие дисплея, занесенного в черный список.";
 
@@ -133,8 +214,20 @@
 /* Shown in the Display Settings */
 "This is a virtual display (examples: AirPlay, Sidecar, display connected via a DisplayLink Dock or similar) which does not allow hardware or software gammatable control. Shading is used as a substitute but only in non-mirror scenarios. Mouse cursor will be unaffected and artifacts may appear when entering/leaving full screen mode." = "Это виртуальный дисплей (например: AirPlay, Sidecar, дисплей подключенный через док-станцию DisplayLink или аналогичное устройство), который не поддерживает аппаратное или программное управление гаммой. Затенение используется в качестве замены, но только в режимах без видео-повтора. При этом курсор мыши останется неизменным и могут возникнуть артефакты при входе/выходе из полноэкранного режима.";
 
+/* Schedule prefs */
+"Time" = "Время";
+
+/* Main display prefs */
+"To switch which input the monitor shows (DisplayPort / HDMI 1 / HDMI 2), use the “Monitor input” submenu in the menu bar. Selecting a non-Mac input also moves windows to the built-in screen. Returning to the Mac input is done from the other computer or the monitor's own button — turn on automatic switching above to have windows move back by themselves." = "Чтобы выбрать вход, который показывает монитор (DisplayPort / HDMI 1 / HDMI 2), используйте подменю «Вход монитора» в строке меню. Выбор не-маковского входа также переносит окна на встроенный экран. Возврат на вход Mac делается с другого компьютера или кнопкой самого монитора — включите автопереключение выше, чтобы окна возвращались сами.";
+
 /* Unknown display name */
 "Unknown" = "Неизвестный";
+
+/* Main display prefs */
+"Use LG alternate input addressing (try this if switching the monitor input does nothing)" = "Использовать альтернативную адресацию входов LG (попробуйте, если переключение входа не срабатывает)";
+
+/* Main display prefs */
+"Use this to move the main display (menu bar and windows) between your monitor and the built-in screen — for example before switching the monitor to a Windows PC. Switch the monitor's input yourself with its own button. Monitor sleep does NOT move your windows. This action is also in the menu-bar menu." = "Переносит главный дисплей (строку меню и окна) между монитором и встроенным экраном — например, перед переключением монитора на ПК с Windows. Вход монитора переключайте сами его кнопкой. Засыпание монитора окна НЕ переносит. То же действие есть в меню строки меню.";
 
 /* Version */
 "Version" = "Версия";
