@@ -8,7 +8,6 @@
 //  query. Monitor sleep is never mistaken for an input change, so windows are not reshuffled on sleep.
 
 import Cocoa
-import KeyboardShortcuts
 import os.log
 import Settings
 
