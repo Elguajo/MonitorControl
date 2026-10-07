@@ -18,15 +18,15 @@ class AboutPrefsViewController: NSViewController, SettingsPane {
 
   @IBOutlet var versionLabel: NSTextField!
   @IBOutlet var copyrightLabel: NSTextField!
+  @IBOutlet var updateButton: NSButton!
 
   override func viewDidLoad() {
     super.viewDidLoad()
     self.setAppInfo()
     self.setCopyrightInfo()
-  }
-
-  @IBAction func checkForUpdates(sender: NSButton) {
-    app.updaterController.checkForUpdates(sender)
+    self.updateButton.title = NSLocalizedString("Manual updates only", comment: "Fork update policy")
+    self.updateButton.isEnabled = false
+    self.updateButton.toolTip = NSLocalizedString("Updates are installed manually in this fork.", comment: "Fork update policy")
   }
 
   @IBAction func openDonate(_: NSButton) {

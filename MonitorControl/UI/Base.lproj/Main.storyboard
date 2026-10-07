@@ -2015,9 +2015,6 @@
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
-                                <connections>
-                                    <action selector="checkForUpdatesWithSender:" target="7uI-eE-yxm" id="Z7G-jz-0xK"/>
-                                </connections>
                             </button>
                             <button verticalHuggingPriority="750" id="rqH-BW-IT6">
                                 <rect key="frame" x="249" y="165" width="420" height="20"/>
@@ -2065,6 +2062,7 @@
                     </view>
                     <connections>
                         <outlet property="copyrightLabel" destination="Dqc-RQ-Lbc" id="lGL-A6-Lto"/>
+                        <outlet property="updateButton" destination="PEt-Ef-kWK" id="fork-update-button"/>
                         <outlet property="versionLabel" destination="tMg-qE-zTW" id="G1o-YJ-X4n"/>
                     </connections>
                 </viewController>

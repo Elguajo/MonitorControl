@@ -243,3 +243,9 @@
 
 /* Shown in the alert dialog */
 "You need to enable MonitorControl in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work" = "You need to enable MonitorControl in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work";
+
+/* Fork update policy */
+"Manual updates only" = "Manual updates only";
+
+/* Fork update policy */
+"Updates are installed manually in this fork." = "Updates are installed manually in this fork.";

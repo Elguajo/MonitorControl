@@ -4,7 +4,7 @@
 <h3>MonitorControl</h3>
 <p>Controls your external display brightness and volume and shows native OSD.
 Use menubar extra sliders or the keyboard, including native Apple keys!</p>
-<a href="https://github.com/MonitorControl/MonitorControl/releases"><img src=".github/macos_badge_noborder.png" width="175" alt="Download for macOS"/></a>
+<a href="BUILDING.md"><img src=".github/macos_badge_noborder.png" width="175" alt="Build this fork for macOS"/></a>
 </div>
 
 <br/><br/>
@@ -26,10 +26,9 @@ Use menubar extra sliders or the keyboard, including native Apple keys!</p>
 
 ## Download
 
-Go to [Releases](https://github.com/MonitorControl/MonitorControl/releases) and download the latest `.dmg`, or you can install via Homebrew:
-```shell
-brew install --cask monitorcontrol
-```
+This fork adds scheduled brightness, monitor input switching, and automatic main-display switching. Build and install it using [BUILDING.md](BUILDING.md). Updates are installed manually; official update checks and installation are disabled to preserve the fork's features.
+
+The [official MonitorControl releases](https://github.com/MonitorControl/MonitorControl/releases) and Homebrew cask provide the upstream app without these additions. The upstream badges below the header describe that project.
 
 ## Major features
 

@@ -74,7 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     BrightnessScheduler.shared.start()
     InputSourceWatcher.shared.start()
     KeepAwakeManager.shared.start()
-    self.updaterController.startUpdater()
+    // Leave Sparkle stopped: the official update feed does not contain this fork's features.
   }
 
   @objc func quitClicked(_: AnyObject) {
@@ -164,8 +164,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     if !prefs.bool(forKey: PrefKey.appAlreadyLaunched.rawValue) {
       // Only settings that are not false, 0 or "" by default are set here. Assumes pre-wiped database.
       prefs.set(true, forKey: PrefKey.appAlreadyLaunched.rawValue)
-      prefs.set(true, forKey: PrefKey.SUEnableAutomaticChecks.rawValue)
     }
+    // Migrate existing installs too, including previously enabled Sparkle preferences.
+    prefs.set(false, forKey: PrefKey.SUEnableAutomaticChecks.rawValue)
+    prefs.set(false, forKey: "SUAutomaticallyUpdate")
   }
 
   @objc func displayReconfigured() {

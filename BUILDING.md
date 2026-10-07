@@ -13,6 +13,8 @@ Run the hardware-free scheduler regression suite with:
 
 ```sh
 python3 Tests/run-brightness-scheduler-tests.py
+python3 Tests/run-upstream-compatibility-tests.py
+python3 Tests/run-fork-update-tests.py
 ```
 
 Build a universal Release app using Xcode and an available local signing identity:
@@ -36,11 +38,21 @@ it. A local development signature is not notarized public distribution.
 Builds still run the existing SwiftFormat phase, which can format Swift sources.
 Use a disposable source copy when validating without changing the checkout.
 
-Preserve the current app and export its preferences before replacement. Do not
-accept an official MonitorControl update as a fork update: the official binary
-does not contain this fork's schedule, input-switching, or main-display features.
-The official Sparkle feed is still configured and requires a separate fork update
-policy before public distribution.
+Preserve the current app and export its preferences before replacement. Updates
+are installed manually from builds of this fork. Sparkle stays stopped, its
+delegate rejects every kind of update check, and the bundle contains neither an
+official feed URL nor an official update signature key. On launch and settings
+reset, existing automatic-check/install preferences are disabled. The menu has
+no update action; General and About explain that updates are manual. Official
+MonitorControl binaries do not contain this fork's schedule, input-switching,
+or main-display features.
+
+This branch incorporates the audited upstream main revision
+`84ac2d72bfb53b653536e484946f6ed027e4229c`, including macOS 26/27 compatibility,
+the local keyboard-shortcut implementation, fine brightness steps, and Polish
+localization. The new local build is 4.4.0 (7174), with matching app/helper
+versions. Building for both architectures does not establish hardware acceptance
+on Intel or compatibility on macOS 26/27; those still require live checks.
 
 After installation, check manual brightness across sleep/wake, cable reconnect,
 and switching away from/back to the Mac input. A manual adjustment lasts until
