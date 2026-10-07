@@ -116,9 +116,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     menu.updateMenus()
   }
 
+  private func currentReopenSenderBundleIdentifier() -> String? {
+    guard let event = NSAppleEventManager.shared().currentAppleEvent else { return nil }
+    if let pid = event.attributeDescriptor(forKeyword: keySenderPIDAttr)?.int32Value,
+       let sender = NSRunningApplication(processIdentifier: pid_t(pid))
+    {
+      return sender.bundleIdentifier
+    }
+    if let pid = event.attributeDescriptor(forKeyword: keyAddressAttr)?.coerce(toDescriptorType: typeKernelProcessID)?.int32Value,
+       let sender = NSRunningApplication(processIdentifier: pid_t(pid))
+    {
+      return sender.bundleIdentifier
+    }
+    return nil
+  }
+
   func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
-    app.prefsClicked(self)
-    return true
+    guard let senderBundleIdentifier = self.currentReopenSenderBundleIdentifier()?.lowercased(),
+          !senderBundleIdentifier.contains("workflow"), !senderBundleIdentifier.contains("shortcut")
+    else { return false }
+    self.prefsClicked(self)
+    return false
   }
 
   func applicationWillTerminate(_: Notification) {

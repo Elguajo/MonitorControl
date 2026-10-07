@@ -277,7 +277,9 @@ class DisplayManager {
     self.displays.compactMap { display -> OtherDisplay? in
       if let otherDisplay = display as? OtherDisplay, !otherDisplay.isSw() {
         return otherDisplay
-      } else { return nil }
+      } else {
+        return nil
+      }
     }
   }
 
