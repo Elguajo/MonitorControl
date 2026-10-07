@@ -31,15 +31,29 @@ final class BrightnessScheduler {
   private static let reassertDelay: TimeInterval = 2.0
 
   private var timer: Timer?
-  /// Which set-point (0 = morning, 1 = evening) was last applied. nil = nothing applied yet.
+  /// The occurrence of the last applied set-point, including its day. A wake after a full day
+  /// must still cross a schedule boundary even when the morning/evening index is unchanged.
   /// We only push brightness when the active set-point CHANGES (a boundary is crossed) or on an
   /// explicit force, so the user can still adjust brightness manually between boundaries without
   /// the scheduler yanking it back every tick.
-  private var lastAppliedSetpoint: Int?
+  private var lastAppliedSetpoint: Date?
+  private struct ManualBrightness {
+    let value: Float
+    let setpointDate: Date
+  }
+
+  private var manualBrightness: [String: ManualBrightness] = [:]
+  private var isApplyingBrightness = false
+  private var needsReassert = false
+  private let now: () -> Date
   /// Set once `start()` has run, so reassert requests fired during launch (before the scheduler
   /// exists) don't double-apply on top of the initial catch-up.
   private var hasStarted = false
   private var pendingReassert: DispatchWorkItem?
+
+  init(now: @escaping () -> Date = Date.init) {
+    self.now = now
+  }
 
   // MARK: - Pref accessors (single source of truth for defaults)
 
@@ -96,13 +110,31 @@ final class BrightnessScheduler {
   /// Re-evaluates immediately. Call this whenever the schedule settings change in the UI so the
   /// new values take effect right away (also handy for testing with a near-future set-point).
   func settingsChanged() {
+    self.pendingReassert?.cancel()
+    self.pendingReassert = nil
+    self.manualBrightness.removeAll()
     self.lastAppliedSetpoint = nil
     self.evaluate(force: true)
   }
 
-  /// Re-applies the active set-point after an event that can leave the monitor back on whatever
+  /// Remember explicit brightness requests from sliders, keys or brightness sync. Hardware reads
+  /// during display setup can overwrite the ordinary brightness preference, so keep the request
+  /// independently for this schedule interval and reuse it when the display returns.
+  func brightnessChanged(on display: OtherDisplay, to value: Float) {
+    guard self.hasStarted, self.isEnabled, !self.isApplyingBrightness, value.isFinite, value >= 0,
+          app.sleepID == 0, app.reconfigureID == 0,
+          !display.readPrefAsBool(key: .unavailableDDC, for: .brightness),
+          self.targetDisplays().contains(where: { $0.prefsId == display.prefsId }),
+          let setpoint = self.activeSetpoint()
+    else {
+      return
+    }
+    self.manualBrightness[display.prefsId] = ManualBrightness(value: min(value, 1), setpointDate: setpoint.date)
+  }
+
+  /// Re-applies the current desired brightness after an event that can leave the monitor back on whatever
   /// brightness its own firmware remembers: waking from sleep, a display reconfiguration, or the
-  /// monitor returning from another input.
+  /// monitor returning from another input. A manual adjustment wins until the next schedule event.
   ///
   /// Without this the schedule silently stops holding: `evaluate()` bails out while
   /// `app.sleepID`/`app.reconfigureID` are non-zero, and once the system is sober again the active
@@ -125,40 +157,51 @@ final class BrightnessScheduler {
 
   // MARK: - Core logic
 
-  private func currentMinutes() -> Int {
-    let comps = Calendar.current.dateComponents([.hour, .minute], from: Date())
-    return (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-  }
-
   /// The currently active set-point: the most recent set-point whose time has passed today,
   /// wrapping to the latest set-point of the previous day when none has passed yet.
   /// Works regardless of whether morning < evening, evening < morning, or they are equal.
-  private func activeSetpoint() -> (index: Int, brightness: Float) {
-    let now = self.currentMinutes()
+  private func activeSetpoint() -> (index: Int, brightness: Float, date: Date)? {
+    let now = self.now()
+    let calendar = Calendar.current
+    guard let yesterday = calendar.date(byAdding: .day, value: -1, to: now) else {
+      return nil
+    }
     let points: [(time: Int, brightness: Float, index: Int)] = [
       (self.morningTime, self.morningBrightness, 0),
       (self.eveningTime, self.eveningBrightness, 1),
     ]
-    let passed = points.filter { $0.time <= now }
-    let chosen = passed.max(by: { $0.time < $1.time }) ?? points.max(by: { $0.time < $1.time })!
-    return (chosen.index, chosen.brightness)
+    return points.compactMap { point -> (index: Int, brightness: Float, date: Date)? in
+      guard let today = calendar.date(bySettingHour: point.time / 60, minute: point.time % 60, second: 0, of: now),
+            let previous = calendar.date(bySettingHour: point.time / 60, minute: point.time % 60, second: 0, of: yesterday)
+      else {
+        return nil
+      }
+      return (point.index, point.brightness, today <= now ? today : previous)
+    }.max(by: { $0.date < $1.date })
   }
 
   func evaluate(force: Bool = false) {
     guard self.isEnabled else {
+      self.manualBrightness.removeAll()
       self.lastAppliedSetpoint = nil
+      self.needsReassert = false
       return
+    }
+    if force {
+      self.needsReassert = true
     }
     // Don't fight sleep/reconfiguration — leave lastAppliedSetpoint untouched so we retry next tick.
     guard app.sleepID == 0, app.reconfigureID == 0 else {
       return
     }
-    let setpoint = self.activeSetpoint()
-    guard force || setpoint.index != self.lastAppliedSetpoint else {
+    guard let setpoint = self.activeSetpoint(), self.needsReassert || setpoint.date != self.lastAppliedSetpoint else {
       return
     }
-    self.lastAppliedSetpoint = setpoint.index
-    self.apply(brightness: setpoint.brightness, setpointIndex: setpoint.index)
+    self.manualBrightness = self.manualBrightness.filter { $0.value.setpointDate == setpoint.date }
+    if self.apply(brightness: setpoint.brightness, setpointIndex: setpoint.index) {
+      self.lastAppliedSetpoint = setpoint.date
+      self.needsReassert = false
+    }
   }
 
   /// The displays the schedule drives: the one picked in Settings, or all DDC-capable ones when
@@ -174,20 +217,27 @@ final class BrightnessScheduler {
     return all.filter { $0.prefsId == picked }
   }
 
-  private func apply(brightness: Float, setpointIndex: Int) {
-    let value = max(0, min(1, brightness))
+  private func apply(brightness: Float, setpointIndex: Int) -> Bool {
     let displays = self.targetDisplays()
     guard !displays.isEmpty else {
       os_log("Scheduler: no target display connected; will re-apply when one appears.", type: .info)
-      return
+      return false
     }
-    os_log("Scheduler applying brightness %{public}@ (set-point %{public}@) to %{public}@ display(s).", type: .info, String(value), String(setpointIndex), String(displays.count))
+    os_log("Scheduler restoring brightness (set-point %{public}@) to %{public}@ display(s).", type: .info, String(setpointIndex), String(displays.count))
+    self.isApplyingBrightness = true
+    defer { self.isApplyingBrightness = false }
+    var applied = false
     for display in displays where !display.readPrefAsBool(key: .unavailableDDC, for: .brightness) {
+      let value = self.manualBrightness[display.prefsId]?.value ?? max(0, min(1, brightness))
       // slow: true → gentle smooth ramp via existing setSmoothBrightness → DDC 0x10.
-      _ = display.setBrightness(value, slow: true)
+      guard display.reapplyBrightness(value, slow: true) else {
+        continue
+      }
+      applied = true
       if let slider = display.sliderHandler[.brightness] {
         slider.setValue(value, displayID: display.identifier)
       }
     }
+    return applied
   }
 }

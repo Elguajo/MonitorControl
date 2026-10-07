@@ -328,7 +328,20 @@ class OtherDisplay: Display {
 
   override func setBrightness(_ to: Float = -1, slow: Bool = false) -> Bool {
     self.checkGammaInterference()
-    return super.setBrightness(to, slow: slow)
+    let changed = super.setBrightness(to, slow: slow)
+    if changed {
+      BrightnessScheduler.shared.brightnessChanged(on: self, to: to)
+    }
+    return changed
+  }
+
+  /// The monitor may have reset its hardware value while asleep without a reconfiguration.
+  /// Its last cached DDC write then no longer proves that it has the requested brightness.
+  func reapplyBrightness(_ value: Float, slow: Bool = false) -> Bool {
+    self.writeDDCQueue.sync {
+      self.writeDDCLastSavedValue[.brightness] = nil
+    }
+    return self.setBrightness(value, slow: slow)
   }
 
   override func setDirectBrightness(_ to: Float, transient: Bool = false) -> Bool {

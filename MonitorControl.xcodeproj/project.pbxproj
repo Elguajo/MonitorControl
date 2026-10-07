@@ -433,8 +433,6 @@
 				F06792E3200A73460066C438 /* Sources */,
 				F06792E4200A73460066C438 /* Frameworks */,
 				F06792E5200A73460066C438 /* Resources */,
-				28F6A5802283515F00A4ADCD /* Increase Build Number */,
-				28F6A5822283548F00A4ADCD /* Sync Version Numbers */,
 			);
 			buildRules = (
 			);
@@ -562,44 +560,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftformat >/dev/null; then\n  swiftformat .\nelse\n  echo \"warning: SwiftFormat not installed, download from https://github.com/nicklockwood/SwiftFormat\" >&2\nfi\n";
-		};
-		28F6A5802283515F00A4ADCD /* Increase Build Number */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Increase Build Number";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/bash -euo pipefail";
-			shellScript = "files_have_changed() {\n  test -n \"$(find \"${1}\" ! -path '*xcuserdata*' ! -path '*.git' ! -path '*.git/*' -newer \"${2}\")\"\n}\n\nif files_have_changed \"${PROJECT_DIR}\" \"${INFOPLIST_FILE}\"; then\n  build_number=\"$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${INFOPLIST_FILE}\")\"\n  new_build_number=\"$((build_number + 1))\"\n\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${new_build_number}\" \"${INFOPLIST_FILE/Helper/}\"\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${new_build_number}\" \"${INFOPLIST_FILE}\"\nfi\n";
-		};
-		28F6A5822283548F00A4ADCD /* Sync Version Numbers */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Sync Version Numbers";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/bin/bash -euo pipefail";
-			shellScript = "version_number=\"$(/usr/libexec/PlistBuddy -c \"Print CFBundleShortVersionString\" \"${INFOPLIST_FILE/Helper/}\")\"\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString ${version_number}\" \"${INFOPLIST_FILE/Helper/}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString ${version_number}\" \"${INFOPLIST_FILE}\"\n";
 		};
 		6CB1BDB2253C7EBE00B52124 /* [Localization] Run BartyCrouch */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -807,6 +767,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 7173;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -827,6 +788,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 4.3.4;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -869,6 +831,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 7173;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -883,6 +846,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 4.3.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -899,7 +863,6 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7100;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 299YSU96J7;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -913,7 +876,6 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 4.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = app.monitorcontrol.MonitorControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -936,7 +898,6 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7100;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 299YSU96J7;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -950,7 +911,6 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 4.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = app.monitorcontrol.MonitorControl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -976,7 +936,6 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7100;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 299YSU96J7;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -987,7 +946,6 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 4.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.monitorcontrol.MonitorControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1007,7 +965,6 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 7100;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 299YSU96J7;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1018,7 +975,6 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 4.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.monitorcontrol.MonitorControlHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
